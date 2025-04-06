@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- 파라미터 로드 -->
+  <rosparam command="load" file="$(find lidar_camera_calibration)/config/calibration_params.yaml" />
+  
+  <!-- 라이다-카메라 캘리브레이션 노드 시작 -->
+  <node name="lidar_camera_calibration_node" pkg="lidar_camera_calibration" type="lidar_camera_calibration_node" output="screen">
+  </node>
+</launch> 
