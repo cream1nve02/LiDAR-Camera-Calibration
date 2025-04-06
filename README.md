@@ -19,7 +19,7 @@ This package provides a ROS node that projects LiDAR point cloud data onto camer
 cd ~/catkin_ws/src
 
 # Clone the package
-git clone https://github.com/your_username/lidar_camera_calibration.git
+git clone https://github.com/cream1nve02/lidar_camera_calibration.git
 
 # Return to the workspace and build
 cd ~/catkin_ws
