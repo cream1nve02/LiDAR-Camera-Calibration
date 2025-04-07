@@ -34,6 +34,48 @@ public:
      */
     ~LidarCameraCalibration();
 
+    /**
+     * @brief GUI에서 카메라 파라미터 업데이트 시 호출되는 함수
+     * @param value 새 파라미터 값
+     * @param param_type 파라미터 유형 (위치/회전)
+     * @param axis 회전 축 (0=x, 1=y, 2=z)
+     */
+    void updateCameraParameter(int value, int param_type, int axis);
+
+    /**
+     * @brief GUI에서 라이다 파라미터 업데이트 시 호출되는 함수
+     * @param value 새 파라미터 값
+     * @param param_type 파라미터 유형 (위치/회전)
+     * @param axis 회전 축 (0=x, 1=y, 2=z)
+     */
+    void updateLidarParameter(int value, int param_type, int axis);
+
+    /**
+     * @brief 캘리브레이션 파라미터를 저장하는 함수
+     */
+    void saveCalibrationParameters();
+
+    /**
+     * @brief 복셀 크기 설정 함수
+     * @param size 복셀 크기 (미터)
+     */
+    void setVoxelSize(float size);
+
+    /**
+     * @brief 최대 거리 설정 함수
+     * @param dist 최대 거리 (미터)
+     */
+    void setMaxDistance(float dist);
+
+    /**
+     * @brief 포인트 건너뛰기 수 설정 함수
+     * @param skip 건너뛸 포인트 수
+     */
+    void setPointSkip(int skip);
+
+    // GUI 창 이름 접근자
+    std::string getCalibrationWindowName() const { return calibration_window_name_; }
+
 private:
     /**
      * @brief 시간 동기화 설정 함수
@@ -98,6 +140,21 @@ private:
      */
     void projectPointsToImage();
 
+    /**
+     * @brief 캘리브레이션 파라미터 조정용 GUI를 설정하는 함수
+     */
+    void setupCalibrationGUI();
+
+    /**
+     * @brief 포인트 클라우드 필터링 옵션 GUI를 설정하는 함수
+     */
+    void setupFilterGUI();
+
+    /**
+     * @brief 포인트 클라우드 필터링 함수
+     */
+    void filterPointCloud();
+
     // ROS 관련 변수
     ros::NodeHandle nh_;                      ///< ROS 노드 핸들
     image_transport::ImageTransport it_;      ///< 이미지 전송 핸들러
@@ -114,7 +171,8 @@ private:
     boost::shared_ptr<Synchronizer> sync_;             ///< 메시지 동기화 객체
 
     // 포인트 클라우드 및 이미지 데이터
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_; ///< 라이다 포인트 클라우드
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_; ///< 원본 라이다 포인트 클라우드
+    pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud_; ///< 필터링된 라이다 포인트 클라우드
     cv::Mat image_;                             ///< 카메라 이미지
 
     // 카메라 파라미터
@@ -128,9 +186,22 @@ private:
     double lidar_x_, lidar_y_, lidar_z_;    ///< 라이다 위치
     double lidar_roll_, lidar_pitch_, lidar_yaw_; ///< 라이다 자세 (RPY)
     
+    // 필터링 파라미터
+    float voxel_size_;              ///< 복셀 크기 (미터)
+    float max_distance_;            ///< 최대 거리 (미터)
+    int point_skip_;                ///< 건너뛸 포인트 수
+    
     // 변환 행렬
     Eigen::Matrix4d transform_lidar_to_cam_; ///< 라이다에서 카메라로의 변환 행렬
     Eigen::Matrix3d camera_matrix_;         ///< 카메라 내부 파라미터 행렬
+
+    // GUI 관련 변수
+    std::string calibration_window_name_;  ///< 캘리브레이션 GUI 창 이름
+    std::string filter_window_name_;       ///< 필터링 GUI 창 이름
+    
+    // 파라미터 배율 (트랙바 값 변환용)
+    static constexpr double POS_SCALE_ = 100.0;  ///< 위치 값 스케일링 (cm 단위 표시)
+    static constexpr double ROT_SCALE_ = 100.0;  ///< 회전 값 스케일링 (라디안->각도)
 };
 
 } // namespace lidar_camera_calibration
